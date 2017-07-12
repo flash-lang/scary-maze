@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<style>
+			body{font:14px Arial, Helvetica, sans-serif}
+			body.face{background:#000 url(images/face1.jpg) top center no-repeat; background-size:1000px auto}
+			#page{position:relative;}
+			#follower{position:absolute; background-color:red; padding:5px; border-radius:50%; cursor:none; display:none;}
+			#frame{position:relative; margin:20px auto; width:500px;}
+			#start{padding:5px; background:#be0000; color:#fff; position:absolute; bottom:10px; left:208px; cursor:pointer; transition:0.3s}
+			#start:hover{background:#000;}
+			#score{background:#eee; border:1px solid #aaa; border-radius:5px; position:absolute; top:0; right:20px;padding:10px;width:200px; text-align:center; color:#333; font-weight:bold;}
+			#score table {border-collapse:collapse; margin:0 auto; }
+			#score table td{background:#fff; border:1px solid #aaa; padding:5px; font-size:14px; }
+			#score p {font-weight:normal; font-size:12px;}
+			#score h1{font-size:16px; margin-top:0;}
+			#monster{padding:5px; background:#000; bottom:50px; left:300px; position:absolute; display:inline-block;}
+		</style>
+		<title>Maze</title>
+		<meta name="description" content="" />
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<script src="js/jquery-1.7.1.min.js"></script>
+		<script src="js/hittest-min.js"></script>
+		
+		<!--[if lt IE 9]>
+			<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+
+	</head>
+	<body>
+
+		<div id="page">
+			<div id="score">
+				<h1>Level: <span id="level">1</span></h1>
+				<hr>
+				<table>
+					<tr><td id="mins">00</td><td id="secs">00</td><td id="millisecs">000</td></tr>
+				</table>
+				<p id="boo"></p>
+				<p id="YPos"></p>
+			</div>
+			<div id="frame">
+				<img id="maze" src="images/MAZE1.png"/>
+				<div id="start" onClick="Go();">Click To Start</div>
+			</div>
+		</div>		
+		<div id="follower"></div>		
+		
+<script>
+
+var follower = $("#follower");
+var level = 1;
+var booTimer = 0;
+
+function Go(){
+
+	var btnPos = $("#start").offset();
+	var xp = btnPos.left+45, yp = btnPos.top+10;
+	var  mouseX = xp, mouseY = yp;	
+	var secs = 0;
+	var mins = 0;
+	var millisecs = 0;
+	
+	$("#start").hide();
+	follower.show();
+	follower.css({left:mouseX, top:mouseY});
+	$('#frame').css({cursor:"none"});	
+
+	$('#frame').mousemove(function(e){
+	   mouseX = e.pageX;
+	   mouseY = e.pageY; 				  	   
+	});
+	
+	loop = setInterval(function(){
+		xp += (mouseX - xp) / 5;
+		yp += (mouseY - yp) / 5;
+		follower.css({left:xp, top:yp});
+	
+		millisecs += 50;
+		booTimer ++;
+		
+		console
+		if (millisecs == 1000) {secs ++; millisecs = 0}
+		if (secs == 10) {mins ++; secs = 0}
+		
+		millisecsTick = millisecs;
+		secsTick = secs;
+		minsTick = mins;
+		
+		if (millisecs < 10) millisecsTick = "00" + millisecs;
+		else if (millisecs < 100) millisecsTick = "0" + millisecs;
+		if (secs < 10) {
+			secsTick = "0" + secs; 
+			$("#secs").html(secsTick);
+		}
+		if (mins < 10) {
+			minsTick = "0" + mins;
+			$("#mins").html(minsTick);
+		}	
+		
+		$("#millisecs").html(millisecsTick);
+		
+		$("#boo").html(booTimer);
+		$("#YPos").html(Math.round(yp));
+		
+		if (booTimer > 100 && yp < 500) Boo();
+		
+	    var hit = $('#maze').hitTestPoint({"x":xp,"y":yp, "transparency":true, "radius":10});		
+	    if (hit == 1) Reset();	
+		else if (hit == 2)	{
+			alert('WIN');
+			$("#score").append( "<p>Level "+ level + " Time: <b>" + minsTick +":"+ secsTick +":"+ millisecsTick + "</b>");
+			if (level < 4) level ++;
+			else level = 1;
+			$('#level').html(level);
+			$('#maze').attr("src","images/MAZE"+level+".png");
+			Reset();
+		}
+	}, 50);
+				
+}
+
+function Reset(){
+	
+	$('#frame').unbind('mousemove');	
+	$('#frame').css({cursor:"default"});	
+	
+	clearInterval(loop);
+	console.log('HIT!!!');
+	$("#start").show();
+	follower.hide();
+
+}
+
+function Boo(){
+	clearInterval(loop);
+	follower.hide();
+	$("#page").html('');
+	$("body").addClass('face');
+}
+
+</script>		
+		
+	</body>
+</html>
